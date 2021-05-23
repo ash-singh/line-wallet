@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
   verification_token: String,
   placid_access_token: String,
   placid_item_id: String,
+  dwolla_wallet: String,
+  dwolla_funding_source: String,
   is_verified: Boolean
 });
 

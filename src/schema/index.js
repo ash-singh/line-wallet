@@ -14,6 +14,7 @@ const {
 // Import Controllers
 const userController = require('../controllers/userController')
 const plaidController = require('../controllers/plaidController')
+const dwollaController = require('../controllers/dwollaController')
 
 // Define Object Types
 const userType = new GraphQLObjectType({
@@ -124,6 +125,16 @@ const Mutations = new GraphQLObjectType({
 			},
 			async resolve(parent, args) {
 				const data = await plaidController.getAccountRoutingInfo(args)
+				return data
+			}
+		},
+		createWallet: {
+			type: userType,
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await dwollaController.createWallet(args)
 				return data
 			}
 		}

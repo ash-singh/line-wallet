@@ -15,4 +15,9 @@ module.exports = {
     plaid_country_codes: process.env.PLAID_COUNTRY_CODES,
     plaid_products: process.env.PLAID_PRODUCTS,
     plaid_redirect: process.env.PLAID_REDIRECT_URI,
+
+    dwolla_app_key: process.env.DWOLLA_APP_KEY,
+    dwolla_app_secret: process.env.DWOLLA_APP_SECRET,
+    dwolla_env: process.env.PLAID_ENV,
+        
 }
