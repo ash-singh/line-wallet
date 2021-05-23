@@ -1,6 +1,6 @@
 const boom = require('boom');
 const User = require('../models/User');
-const {prettyPrintResponse} = require('../util');
+const {prettyPrintResponse, formatError} = require('../util');
 const {app_name, plaid_products, plaid_redirect, plaid_country_codes} = require('../config');
 
 const plaidClient = require('../libs/plaid/client');
@@ -54,6 +54,55 @@ exports.setAccessToken = async req => {
     return update;
     
 	} catch (err) {
+		throw boom.boomify(err);
+	}
+}
+
+exports.setAccessToken = async req => {
+	try {
+		
+    const publicToken = req.params === undefined ? req.public_token : req.params.public_token;
+    const userId = req.params === undefined ? req.user_id : req.params.user_id;
+
+    const tokenResponse = await plaidClient.itemPublicTokenExchange({
+      public_token: publicToken,
+    });
+
+    const update = await User.findByIdAndUpdate(userId, { 
+      placid_access_token: tokenResponse.data.access_token, 
+      placid_item_id: tokenResponse.data.item_id}, {
+      new: true,
+     });
+    
+    return update;
+    
+	} catch (err) {
+    throw boom.boomify(err);
+	}
+}
+
+exports.getUserIdentity = async req => {
+	try {
+		
+    const userId = req.params === undefined ? req.user_id : req.params.user_id;
+
+    const user = await User.findById(userId);
+
+    prettyPrintResponse(user);
+
+    const identityResponse = await plaidClient.identityGet({
+      access_token: user.placid_access_token,
+    });
+
+    const identities = identityResponse.data.accounts.flatMap(
+      (account) => account.owners,
+    );
+    prettyPrintResponse(identities);
+
+    return identities;
+    
+	} catch (err) {
+    formatError(err);
 		throw boom.boomify(err);
 	}
 }

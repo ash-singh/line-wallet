@@ -96,6 +96,16 @@ const Mutations = new GraphQLObjectType({
 				const data = await plaidController.setAccessToken(args)
 				return data
 			}
+		},
+		getUserIdentity: {
+			type: userType,
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await plaidController.getUserIdentity(args)
+				return data
+			}
 		}
 	}
 })
