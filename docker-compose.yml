@@ -1,0 +1,9 @@
+version: '3.2'
+services:
+  mongo:
+    image: mongo:3.4.16-jessie
+    ports:
+      - '27019:27017'
+    volumes:
+      - './docker/data/mongo/db:/data/db'
+      - './docker/data/mongo/restore:/data/restore:ro'
