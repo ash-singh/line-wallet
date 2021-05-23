@@ -1,7 +1,7 @@
 const boom = require('boom');
 const User = require('../models/User');
 const crypto = require('crypto');
-const {apiInstance, sendSmtpEmail} = require('../packages/sib/api')
+const {apiInstance, sendSmtpEmail} = require('../libs/sib/api')
 
 // Get all Users
 exports.getUsers = async (req, reply) => {
