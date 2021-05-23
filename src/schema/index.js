@@ -7,7 +7,8 @@ const {
 	GraphQLInt,
 	GraphQLID,
 	GraphQLList,
-	GraphQLNonNull
+	GraphQLNonNull,
+	GraphQLBoolean
 } = graphql
 
 // Import Controllers
@@ -21,6 +22,7 @@ const userType = new GraphQLObjectType({
 		name: { type: GraphQLString },
 		email: { type: GraphQLString },
 		phone: { type: GraphQLString },
+		is_verified: {type: GraphQLBoolean},
         age: {type: GraphQLInt}
     })
 })
@@ -44,9 +46,25 @@ const Mutations = new GraphQLObjectType({
 	fields: {
 		addUser: {
 			type: userType,
-			args: {},
-			async resolve(args) {
-				return ''
+			args: {
+				name: { type: new GraphQLNonNull(GraphQLString) },
+				email: { type: new GraphQLNonNull(GraphQLString) },
+				phone: { type: GraphQLString }
+			},
+			async resolve(parent, args) {
+				const data = await userController.addUser(args)
+				return data
+			}
+		},
+		verifyUser: {
+			type: userType,
+			args: {
+				verification_token: { type: new GraphQLNonNull(GraphQLString) },
+				email: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await userController.verifyUser(args)
+				return data
 			}
 		}
 	}
