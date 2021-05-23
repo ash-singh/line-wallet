@@ -1,6 +1,7 @@
 const boom = require('boom');
 const User = require('../models/User');
 const crypto = require('crypto');
+const {apiInstance, sendSmtpEmail} = require('../packages/sib/api')
 
 // Get all Users
 exports.getUsers = async (req, reply) => {
@@ -12,6 +13,22 @@ exports.getUsers = async (req, reply) => {
   }
 }
 
+function sendConfirmtionEmail(user) {
+  sendSmtpEmail.subject = "Confirm Line Wallet account";
+  sendSmtpEmail.htmlContent = "<html><body><h1>Please verify your line wallet account </h1>" + 
+    "<h3>verification token: {{params.verification_token}} </h3></body></html>";
+  sendSmtpEmail.sender = {"name":"Line Wallet","email":"ashwani4u4888@gmail.com"};
+  sendSmtpEmail.to = [{"email":user.email,"name":user.name}];
+  
+  sendSmtpEmail.params = {"verification_token": user.verification_token};
+
+  apiInstance.sendTransacEmail(sendSmtpEmail).then(function(data) {
+    console.log('SIB API called successfully. Returned data: ' + JSON.stringify(data));
+  }, function(error) {
+    console.error(error);
+  });
+}
+
 // Add/Signup user
 exports.addUser = async req => {
 	try {
@@ -20,6 +37,10 @@ exports.addUser = async req => {
     user.is_verified = false;
     
 		const newUser = await user.save();
+
+    // sending verification token email
+    sendConfirmtionEmail(user);
+
 		return newUser;
 	} catch (err) {
 		throw boom.boomify(err);
