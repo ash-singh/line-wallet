@@ -88,8 +88,6 @@ exports.getUserIdentity = async req => {
 
     const user = await User.findById(userId);
 
-    prettyPrintResponse(user);
-
     const identityResponse = await plaidClient.identityGet({
       access_token: user.placid_access_token,
     });
@@ -100,6 +98,23 @@ exports.getUserIdentity = async req => {
     prettyPrintResponse(identities);
 
     return identities;
+    
+	} catch (err) {
+    formatError(err);
+		throw boom.boomify(err);
+	}
+}
+
+exports.getAccountRoutingInfo = async req => {
+	try {
+		
+    const userId = req.params === undefined ? req.user_id : req.params.user_id;
+
+    const user = await User.findById(userId);
+
+    const authResponse = await plaidClient.authGet({ access_token: user.placid_access_token });
+    
+    return authResponse.data.numbers.ach;
     
 	} catch (err) {
     formatError(err);

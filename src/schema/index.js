@@ -36,6 +36,16 @@ const plaidLinkTokenType = new GraphQLObjectType({
     })
 });
 
+const plaidAccountRountingType = new GraphQLObjectType({
+	name: 'PlaidAccountRounting',
+	fields: () => ({
+        account: { type: GraphQLString },
+		account_id: { type: GraphQLString },
+		routing: { type: GraphQLString },
+		wire_routing: { type: GraphQLString },
+    })
+});
+
 // Define Root Query
 const RootQuery = new GraphQLObjectType({
 	name: 'RootQueryType',
@@ -104,6 +114,16 @@ const Mutations = new GraphQLObjectType({
 			},
 			async resolve(parent, args) {
 				const data = await plaidController.getUserIdentity(args)
+				return data
+			}
+		},
+		getAccountRoutingInfo: {
+			type: new GraphQLList(plaidAccountRountingType),
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await plaidController.getAccountRoutingInfo(args)
 				return data
 			}
 		}
