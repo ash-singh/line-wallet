@@ -5,6 +5,8 @@ const userSchema = new mongoose.Schema({
   email: String,
   phone: String,
   verification_token: String,
+  placid_access_token: String,
+  placid_item_id: String,
   is_verified: Boolean
 });
 

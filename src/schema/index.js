@@ -25,7 +25,7 @@ const userType = new GraphQLObjectType({
 		phone: { type: GraphQLString },
 		is_verified: {type: GraphQLBoolean}
     })
-})
+});
 
 const plaidLinkTokenType = new GraphQLObjectType({
 	name: 'PlaidLinkToken',
@@ -34,7 +34,7 @@ const plaidLinkTokenType = new GraphQLObjectType({
 		link_token: { type: GraphQLString },
 		request_id: { type: GraphQLString }
     })
-})
+});
 
 // Define Root Query
 const RootQuery = new GraphQLObjectType({
@@ -47,7 +47,7 @@ const RootQuery = new GraphQLObjectType({
 			}
         }
 	}
-})
+});
 
 // Define Mutations
 const Mutations = new GraphQLObjectType({
@@ -83,6 +83,17 @@ const Mutations = new GraphQLObjectType({
 			},
 			async resolve(parent, args) {
 				const data = await plaidController.createLinkToken(args)
+				return data
+			}
+		},
+		setPlaidAccessToken: {
+			type: userType,
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				public_token: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await plaidController.setAccessToken(args)
 				return data
 			}
 		}

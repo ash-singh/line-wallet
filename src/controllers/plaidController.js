@@ -27,12 +27,32 @@ exports.createLinkToken = async req => {
       configs.redirect_uri = plaid_redirect;
     }
     
-    try {
-      const createTokenResponse = await plaidClient.linkTokenCreate(configs);
-      return createTokenResponse.data;
-    } catch (error) {
-      prettyPrintResponse(error);
-    }
+    const createTokenResponse = await plaidClient.linkTokenCreate(configs);
+    return createTokenResponse.data;
+	} catch (err) {
+		throw boom.boomify(err);
+	}
+}
+
+exports.setAccessToken = async req => {
+	try {
+		
+    const publicToken = req.params === undefined ? req.public_token : req.params.public_token;
+    const userId = req.params === undefined ? req.user_id : req.params.user_id;
+
+    const tokenResponse = await plaidClient.itemPublicTokenExchange({
+      public_token: publicToken,
+    });
+
+    const update = await User.findByIdAndUpdate(userId, { 
+      placid_access_token: tokenResponse.data.access_token, 
+      placid_item_id: tokenResponse.data.item_id}, {
+      new: true,
+     });
+    
+    prettyPrintResponse(update)
+    return update;
+    
 	} catch (err) {
 		throw boom.boomify(err);
 	}
