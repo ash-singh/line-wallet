@@ -13,6 +13,7 @@ const {
 
 // Import Controllers
 const userController = require('../controllers/userController')
+const plaidController = require('../controllers/plaidController')
 
 // Define Object Types
 const userType = new GraphQLObjectType({
@@ -23,6 +24,15 @@ const userType = new GraphQLObjectType({
 		email: { type: GraphQLString },
 		phone: { type: GraphQLString },
 		is_verified: {type: GraphQLBoolean}
+    })
+})
+
+const plaidLinkTokenType = new GraphQLObjectType({
+	name: 'PlaidLinkToken',
+	fields: () => ({
+        expiration: { type: GraphQLString },
+		link_token: { type: GraphQLString },
+		request_id: { type: GraphQLString }
     })
 })
 
@@ -63,6 +73,16 @@ const Mutations = new GraphQLObjectType({
 			},
 			async resolve(parent, args) {
 				const data = await userController.verifyUser(args)
+				return data
+			}
+		},
+		createLinkToken: {
+			type: plaidLinkTokenType,
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await plaidController.createLinkToken(args)
 				return data
 			}
 		}

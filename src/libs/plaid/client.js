@@ -12,4 +12,4 @@ const configuration = new Configuration({
   },
 });
 
-module.exports.client = new PlaidApi(configuration);
+module.exports = new PlaidApi(configuration);
