@@ -24,5 +24,4 @@
 ```shell script
     $ bash run.sh
 ```
-
 5. naviagate to [http://localhost:4000/graphql](http://localhost:4000/graphql)

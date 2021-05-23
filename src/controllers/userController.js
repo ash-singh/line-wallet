@@ -30,7 +30,7 @@ exports.verifyUser = async req => {
 	try {
 		
     const email = req.params === undefined ? req.email : req.params.email;
-    const verification_token = req.params === undefined ? req.token : req.params.token;
+    const verification_token = req.params === undefined ? req.verification_token : req.params.verification_token;
 		
     const filter = { 
       email: email,
