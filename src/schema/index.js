@@ -145,7 +145,7 @@ const Mutations = new GraphQLObjectType({
 			}
 		},
 		getAccountRoutingInfo: {
-			type: new GraphQLList(plaidAccountRountingType),
+			type: plaidAccountRountingType,
 			args: {
 				user_id: { type: new GraphQLNonNull(GraphQLString) },
 				access_token: { type: new GraphQLNonNull(GraphQLString) }

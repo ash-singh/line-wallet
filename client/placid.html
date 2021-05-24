@@ -1,0 +1,37 @@
+
+<button id="link-button">Link Placid Account</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script type="text/javascript">
+(async function($) {
+  var handler = Plaid.create({
+    // Create a new link_token to initialize Link
+    token: 'link-sandbox-df486339-1b3c-4ce9-a805-07696c0ac4d2', 
+    onLoad: function() {
+    },
+    onSuccess: function(public_token, metadata) {
+      // Send the public_token to your app server.
+      // The metadata object contains info about the institution the
+      // user selected and the account ID or IDs, if the
+      // Select Account view is enabled.
+      console.log(public_token);
+    },
+    onExit: function(err, metadata) {
+      // The user exited the Link flow.
+      if (err != null) {
+        // The user encountered a Plaid API error prior to exiting.
+      }
+      // metadata contains information about the institution
+      // that the user selected and the most recent API request IDs.
+      // Storing this information can be helpful for support.
+    },
+    onEvent: function(eventName, metadata) {
+    }
+  });
+
+  $('#link-button').on('click', function(e) {
+    handler.open();
+  });
+})(jQuery);
+</script>

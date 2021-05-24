@@ -1,5 +1,5 @@
 const boom = require('boom');
-const User = require('../models/User');
+const {User} = require('../models/Model');
 const {prettyPrintResponse, formatError} = require('../util');
 const dwollaClient = require('../libs/dwolla/client');
 

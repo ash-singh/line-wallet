@@ -1,10 +1,43 @@
-const boom = require('boom');
-const User = require('../models/User');
+const {User, Placid} = require('../models/Model');
 const {prettyPrintResponse, formatError} = require('../util');
 const {app_name, plaid_products, plaid_redirect, plaid_country_codes} = require('../config');
 
 const plaidClient = require('../libs/plaid/client');
 
+
+const extractPlacidUserIdentity = (identities) => {
+  var identity = identities[0];
+
+  const addresses = identity.addresses;
+  const emails = identity.emails;
+  const phones = identity.phone_numbers;
+
+  var userIdentity = {
+    full_name: identity.names.join('')
+  };
+
+  for (let address of addresses) {
+    if (address.primary == true) {
+      userIdentity.address = address.data;
+    }
+  }
+
+  for (let email of emails) {
+    if (email.primary == true) {
+      userIdentity.email = email.data;
+    }
+  }
+
+  for (let phone of phones) {
+    if (phone.primary == true) {
+      userIdentity.phone = phone.data;
+    }
+  }
+
+  return userIdentity;
+}
+
+// Create placid link token
 exports.createLinkToken = async req => {
 	try {
 		
@@ -39,7 +72,7 @@ exports.createLinkToken = async req => {
     const createTokenResponse = await plaidClient.linkTokenCreate(configs);
     return createTokenResponse.data;
 	} catch (err) {
-		throw boom.boomify(err);
+		prettyPrintResponse(err);
 	}
 }
 
@@ -51,7 +84,7 @@ exports.setAccessToken = async req => {
     const userId = req.params === undefined ? req.user_id : req.params.user_id;
     const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
 
-    const filter = {_id: clientUserId, access_token: lineAccessToken};
+    const filter = {_id: userId, access_token: lineAccessToken};
     const user = await User.findOne(filter);
 
     if (user === null) {
@@ -63,9 +96,13 @@ exports.setAccessToken = async req => {
       public_token: publicToken,
     });
 
+    const placid = new Placid();
+    placid.access_token = tokenResponse.data.access_token;
+    placid.item_id = tokenResponse.data.item_id;
+
     const update = await User.findByIdAndUpdate(user._id, { 
-      placid_access_token: tokenResponse.data.access_token, 
-      placid_item_id: tokenResponse.data.item_id}, {
+      placid: placid
+    }, {
       new: true,
       useFindAndModify: false
      });
@@ -73,70 +110,73 @@ exports.setAccessToken = async req => {
     return update;
     
 	} catch (err) {
-		throw boom.boomify(err);
+    prettyPrintResponse(err);
 	}
 }
 
-exports.setAccessToken = async req => {
-	try {
-		
-    const publicToken = req.params === undefined ? req.public_token : req.params.public_token;
-    const userId = req.params === undefined ? req.user_id : req.params.user_id;
-
-    const tokenResponse = await plaidClient.itemPublicTokenExchange({
-      public_token: publicToken,
-    });
-
-    const update = await User.findByIdAndUpdate(userId, { 
-      placid_access_token: tokenResponse.data.access_token, 
-      placid_item_id: tokenResponse.data.item_id}, {
-      new: true,
-     });
-    
-    return update;
-    
-	} catch (err) {
-    throw boom.boomify(err);
-	}
-}
-
+// Save user identity
 exports.getUserIdentity = async req => {
 	try {
 		
     const userId = req.params === undefined ? req.user_id : req.params.user_id;
+    const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
 
-    const user = await User.findById(userId);
+    const filter = {_id: userId, access_token: lineAccessToken};
+    const user = await User.findOne(filter);
+
+    if (user === null) {
+      prettyPrintResponse({filter, 'message': "Invalid user"});
+      return;
+    }
 
     const identityResponse = await plaidClient.identityGet({
-      access_token: user.placid_access_token,
+      access_token: user.placid.access_token,
     });
 
     const identities = identityResponse.data.accounts.flatMap(
       (account) => account.owners,
     );
-    prettyPrintResponse(identities);
 
-    return identities;
+    userIdentity = extractPlacidUserIdentity(identities);
+
+    user.placid.address = userIdentity.address;
+    user.placid.full_name = userIdentity.full_name;
+    user.placid.email = userIdentity.email;
+    user.placid.phone = userIdentity.phone;
+
+    const newUser = await user.save();
+
+    return newUser;
     
 	} catch (err) {
-    formatError(err);
-		throw boom.boomify(err);
+    prettyPrintResponse(err);
 	}
 }
 
+// Get account and routing information
 exports.getAccountRoutingInfo = async req => {
 	try {
 		
     const userId = req.params === undefined ? req.user_id : req.params.user_id;
+    const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
 
-    const user = await User.findById(userId);
+    const filter = {_id: userId, access_token: lineAccessToken};
+    const user = await User.findOne(filter);
 
-    const authResponse = await plaidClient.authGet({ access_token: user.placid_access_token });
+    if (user === null) {
+      prettyPrintResponse({filter, 'message': "Invalid user"});
+      return;
+    }
+
+    const authResponse = await plaidClient.authGet({ access_token: user.placid.access_token });
     
-    return authResponse.data.numbers.ach;
+    const account = authResponse.data.numbers.ach[0]
+    
+    user.placid.account = account
+    await user.save();
+    return account;
     
 	} catch (err) {
-    formatError(err);
-		throw boom.boomify(err);
+    prettyPrintResponse(err);
 	}
 }

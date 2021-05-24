@@ -1,5 +1,5 @@
 const boom = require('boom');
-const User = require('../models/User');
+const {User} = require('../models/Model');
 const {encrypt, decrypt, createVerificationToken, createToken} = require('../util');
 
 const {apiInstance, sendSmtpEmail} = require('../libs/sib/api')
