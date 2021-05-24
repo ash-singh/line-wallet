@@ -25,3 +25,12 @@
     $ bash run.sh
 ```
 5. naviagate to [http://localhost:4000/graphql](http://localhost:4000/graphql)
+
+## Setting Plaid access token
+
+1. Call createLinkToken and obtain link_token
+2. Open clinet/placid.html and set 
+    token: 'above link token'
+3. Click Link Placid Account button, follow the steps provided by Plaid. After 
+   successful login you will see the public_token in browser console.
+4. Copy public_token from the browser console and Call setPlaidAccessToken
