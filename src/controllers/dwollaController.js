@@ -2,26 +2,59 @@ const {User} = require('../models/Model');
 const {prettyPrintResponse} = require('../util');
 const dwollaClient = require('../libs/dwolla/client');
 
-const linkWalletSource = (user, customerUrl) => {
+const linkWalletSource = (user, customerUrl, fundingSourceLink) => {
  
   dwollaClient
     .get(`${customerUrl}/funding-sources`)
     .then(function (res) {
-      var fundingSource = res.body._embedded["funding-sources"][0];
+      var fundingSources = res.body._embedded["funding-sources"];
+
+      var balanceAccount = {};
+
+      for (let fundingSource of fundingSources) {
+        if (fundingSource.type == 'balance') {
+          balanceAccount = {
+            id: fundingSource.id,
+            funding_source: fundingSource._links.self.href,
+            created:  fundingSource.created,
+            source_type: fundingSource.type,
+            name: fundingSource.name,
+          };
+        }
+      }
 
       var dwolla = {
         customer: customerUrl,
-        wallet : {
-          id: fundingSource.id,
-          funding_source: fundingSource._links.self.href,
-          created:  fundingSource.created,
-          source_type: fundingSource.type,
-          name: fundingSource.name,
-        }
+        funding_source: fundingSourceLink,
+        wallet : balanceAccount
       };
-      
+
       return User.findByIdAndUpdate(user._id, { dwolla: dwolla}, {new: true, useFindAndModify:false});
     });
+}
+
+const linkBankAccount = (user, customerUrl) => {
+ 
+    var requestBody = {
+      routingNumber: user.placid.account.routing,
+      accountNumber: user.placid.account.account,
+      bankAccountType: user.placid.account.account_type,
+      name: user.placid.account.name,
+    };
+
+    dwollaClient
+      .post(`${customerUrl}/funding-sources`, requestBody)
+      .then(function (res) {
+        var fundingSource = res.headers.get("location");
+
+        var dwolla = {
+          customer: customerUrl,
+          funding_source: fundingSource
+        };
+        
+        linkWalletSource(user, customerUrl, fundingSource);
+    });
+
 }
 
 exports.createWallet = async req => {
@@ -57,7 +90,7 @@ exports.createWallet = async req => {
     dwollaClient.post("customers", requestBody).then(function (res) {
       const customerUrl = res.headers.get("location"); 
       
-      linkWalletSource(user, customerUrl);
+      linkBankAccount(user, customerUrl);
 
     }).catch(function(err){
       prettyPrintResponse(err);

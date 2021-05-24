@@ -19,6 +19,7 @@ const placidSchema = new mongoose.Schema({
     account_id: String,
     routing: String,
     wire_routing: String,
+    account_type: String,
   }
 });
 
@@ -32,6 +33,7 @@ const userSchema = new mongoose.Schema({
   placid: placidSchema,
   dwolla: {
     customer: String,
+    funding_source: String,
     wallet: {
       id: String,
       funding_source: String,

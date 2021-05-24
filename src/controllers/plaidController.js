@@ -45,10 +45,10 @@ const extractAccountIdentity = (data) => {
   for (let account of accounts) {
     if (account.account_id == accountInfo.account_id) {
       accountInfo.name = account.name;
-      accountInfo.type = account.type;
+      accountInfo.account_type = account.type;
     }
   }
-
+  
   return accountInfo;
 }
 
