@@ -1,28 +1,28 @@
-const boom = require('boom');
 const {User} = require('../models/Model');
-const {prettyPrintResponse, formatError} = require('../util');
+const {prettyPrintResponse} = require('../util');
 const dwollaClient = require('../libs/dwolla/client');
 
-const linkWalletSource = (userId, walletUrl) => {
+const linkWalletSource = (user, walletUrl) => {
+
+ 
   var requestBody = {
-    routingNumber: "222222226",
-    accountNumber: "123456789",
+    routingNumber: user.placid.account.routing,
+    accountNumber: user.placid.account.account,
     bankAccountType: "checking",
-    name: "Jane Merchant - Checking 6789",
+    name: user.placid.account.name,
   };
 
   dwollaClient
     .post(`${walletUrl}/funding-sources`, requestBody)
     .then(function (res) {
       const fundingSource = res.headers.get("location");
-      console.log(fundingSource);
-
-      const update = { 
-        dwolla_wallet: walletUrl, 
-        dwolla_funding_source: fundingSource
+      
+      var dwallo = {
+        wallet: walletUrl, 
+        funding_source: fundingSource
       };
 
-      return User.findByIdAndUpdate(userId, update, {new: true,});
+      return User.findByIdAndUpdate(user._id, { dwolla: dwallo}, {new: true, useFindAndModify:false});
     });
 }
 
@@ -30,11 +30,22 @@ exports.createWallet = async req => {
 	try {
 		
     const userId = req.params === undefined ? req.user_id : req.params.user_id;
+    const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
+
+    const filter = {_id: userId, access_token: lineAccessToken};
+    const user =  await User.findOne(filter);
+
+    if (user === null) {
+      prettyPrintResponse({filter, 'message': "Invalid user"});
+      return;
+    }
+    
+    var fullName = user.placid.full_name;
 
     var requestBody = {
-      firstName: "Ashwani",
-      lastName: "Singh",
-      email: "ashwani4u4888+8@gmail.com",
+      firstName: fullName.split(' ').slice(0, -1).join(' '),
+      lastName: fullName.split(' ').slice(-1).join(' '),
+      email: user.placid.email,
       type: "receive-only",
       ipAddress: "99.99.99.99",
     };
@@ -42,7 +53,7 @@ exports.createWallet = async req => {
     dwollaClient.post("customers", requestBody).then(function (res) {
       const wallet = res.headers.get("location"); 
       
-      linkWalletSource(userId, wallet);
+      linkWalletSource(user, wallet);
 
     }).catch(function(err){
       prettyPrintResponse(err);
