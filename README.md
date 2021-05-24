@@ -1,5 +1,8 @@
 # line-wallet
 
+## challenge
+1. node challenge/run.js
+
 ## Prerequisites
 - [nodejs]
 - [docker](https://docs.docker.com/install/)
