@@ -67,10 +67,11 @@ const walletTransactionType = new GraphQLObjectType({
 const walletBalanceType = new GraphQLObjectType({
 	name: 'WalletBalance',
 	fields: () => ({
-        user_id: { type: GraphQLString },
 		wallet_id: { type: GraphQLString },
-		amount: { type: GraphQLString },
-		created: { type: GraphQLString },
+        currency: { type: GraphQLString },
+		balance: { type: GraphQLString },
+		total: { type: GraphQLString },
+		lastUpdated: { type: GraphQLString },
     })
 });
 

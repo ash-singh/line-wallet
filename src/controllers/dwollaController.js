@@ -215,6 +215,24 @@ exports.getWalletBalance = async req => {
       return;
     }
     
+    const balance = dwollaClient
+        .get(`${user.dwolla.wallet.funding_source}/balance`)
+        .then(function (res) {
+          
+          data = res.body;
+
+          const balance = {
+            wallet_id: user.dwolla.wallet.id,
+            currency: data.balance.currency,
+            balance: data.balance.value,
+            total: data.total.value,
+            lastUpdated: data.lastUpdated
+          }
+
+          return balance;
+        });
+      return await balance;
+
 	} catch (err) {
 		prettyPrintResponse(err);
 	}
