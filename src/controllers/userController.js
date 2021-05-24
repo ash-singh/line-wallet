@@ -87,13 +87,11 @@ exports.login = async req => {
       password: encrypt(password)
     };
 
-    console.log(filter);
-
   	const update = await User.findOneAndUpdate(filter, {
        access_token: createToken(32) 
       }, {
        new: true,
-       useFindAndModify: true 
+       useFindAndModify: false 
       });
 		
     return update
