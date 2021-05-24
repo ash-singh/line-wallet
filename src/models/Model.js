@@ -1,14 +1,5 @@
 const mongoose = require('mongoose');
 
-
-const addressSchema = new mongoose.Schema({
-  city: String,
-  country: String,
-  postal_code: String,
-  region: String,
-  street: String
-});
-
 const placidSchema = new mongoose.Schema({
   full_name: String,
   email: String,
@@ -23,6 +14,7 @@ const placidSchema = new mongoose.Schema({
     street: String
   },
   account: {
+    name: String,
     account: String,
     account_id: String,
     routing: String,

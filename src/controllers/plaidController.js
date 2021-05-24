@@ -37,6 +37,22 @@ const extractPlacidUserIdentity = (identities) => {
   return userIdentity;
 }
 
+const extractAccountIdentity = (data) => {
+  
+  const accounts = data.accounts;
+  const accountInfo = data.numbers.ach[0];
+
+  for (let account of accounts) {
+    if (account.account_id == accountInfo.account_id) {
+      accountInfo.name = account.name;
+      accountInfo.type = account.type;
+    }
+  }
+
+  return accountInfo;
+}
+
+
 // Create placid link token
 exports.createLinkToken = async req => {
 	try {
@@ -170,9 +186,10 @@ exports.getAccountRoutingInfo = async req => {
 
     const authResponse = await plaidClient.authGet({ access_token: user.placid.access_token });
     
-    const account = authResponse.data.numbers.ach[0]
+    const account = extractAccountIdentity(authResponse.data);
     
-    user.placid.account = account
+    user.placid.account = account;
+
     await user.save();
     return account;
     
