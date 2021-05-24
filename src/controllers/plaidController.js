@@ -9,6 +9,15 @@ exports.createLinkToken = async req => {
 	try {
 		
     const clientUserId = req.params === undefined ? req.user_id : req.params.user_id;
+    const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
+
+    const filter = {_id: clientUserId, access_token: lineAccessToken};
+    const user = await User.findOne(filter);
+
+    if (user === null) {
+      prettyPrintResponse({filter, 'message': "Invalid user"});
+      return;
+    }
 
     const PLAID_PRODUCTS = (plaid_products).split(',',);
     const PLAID_COUNTRY_CODES = (plaid_country_codes).split(',',);
@@ -34,23 +43,33 @@ exports.createLinkToken = async req => {
 	}
 }
 
+// Set plaid access token
 exports.setAccessToken = async req => {
 	try {
 		
     const publicToken = req.params === undefined ? req.public_token : req.params.public_token;
     const userId = req.params === undefined ? req.user_id : req.params.user_id;
+    const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
+
+    const filter = {_id: clientUserId, access_token: lineAccessToken};
+    const user = await User.findOne(filter);
+
+    if (user === null) {
+      prettyPrintResponse({filter, 'message': "Invalid user"});
+      return;
+    }
 
     const tokenResponse = await plaidClient.itemPublicTokenExchange({
       public_token: publicToken,
     });
 
-    const update = await User.findByIdAndUpdate(userId, { 
+    const update = await User.findByIdAndUpdate(user._id, { 
       placid_access_token: tokenResponse.data.access_token, 
       placid_item_id: tokenResponse.data.item_id}, {
       new: true,
+      useFindAndModify: false
      });
     
-    prettyPrintResponse(update)
     return update;
     
 	} catch (err) {

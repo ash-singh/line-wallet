@@ -113,7 +113,8 @@ const Mutations = new GraphQLObjectType({
 		createLinkToken: {
 			type: plaidLinkTokenType,
 			args: {
-				user_id: { type: new GraphQLNonNull(GraphQLString) }
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			async resolve(parent, args) {
 				const data = await plaidController.createLinkToken(args)
@@ -124,6 +125,7 @@ const Mutations = new GraphQLObjectType({
 			type: userType,
 			args: {
 				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) },
 				public_token: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			async resolve(parent, args) {
@@ -134,7 +136,8 @@ const Mutations = new GraphQLObjectType({
 		getUserIdentity: {
 			type: userType,
 			args: {
-				user_id: { type: new GraphQLNonNull(GraphQLString) }
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			async resolve(parent, args) {
 				const data = await plaidController.getUserIdentity(args)
@@ -144,7 +147,8 @@ const Mutations = new GraphQLObjectType({
 		getAccountRoutingInfo: {
 			type: new GraphQLList(plaidAccountRountingType),
 			args: {
-				user_id: { type: new GraphQLNonNull(GraphQLString) }
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			async resolve(parent, args) {
 				const data = await plaidController.getAccountRoutingInfo(args)
@@ -154,7 +158,8 @@ const Mutations = new GraphQLObjectType({
 		createWallet: {
 			type: userType,
 			args: {
-				user_id: { type: new GraphQLNonNull(GraphQLString) }
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			async resolve(parent, args) {
 				const data = await dwollaController.createWallet(args)
