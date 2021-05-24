@@ -45,5 +45,18 @@ const userSchema = new mongoose.Schema({
   is_verified: Boolean
 });
 
+const transactionSchema = new mongoose.Schema({
+  source: String,
+  destination: String,
+  created: String,
+  status: String,
+  amount: String,
+  currency: String,
+  wallet_id: String,
+  user_id: String,
+  transfer_link: String
+});
+
 module.exports.Placid = mongoose.model('Placid', placidSchema);
 module.exports.User = mongoose.model('User', userSchema)
+module.exports.Transaction = mongoose.model('Transaction', transactionSchema)

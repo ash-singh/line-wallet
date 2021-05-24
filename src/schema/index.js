@@ -8,7 +8,8 @@ const {
 	GraphQLID,
 	GraphQLList,
 	GraphQLNonNull,
-	GraphQLBoolean
+	GraphQLBoolean,
+	GraphQLFloat
 } = graphql
 
 // Import Controllers
@@ -163,6 +164,32 @@ const Mutations = new GraphQLObjectType({
 			},
 			async resolve(parent, args) {
 				const data = await dwollaController.createWallet(args)
+				return data
+			}
+		},
+		depositFundsToWallet: {
+			type: userType,
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) },
+				currency: { type: new GraphQLNonNull(GraphQLString) },
+				amount: { type: new GraphQLNonNull(GraphQLFloat) }
+			},
+			async resolve(parent, args) {
+				const data = await dwollaController.depositFundsToWallet(args)
+				return data
+			}
+		},
+		withdrawFundsFromWallet: {
+			type: userType,
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) },
+				currency: { type: new GraphQLNonNull(GraphQLString) },
+				amount: { type: new GraphQLNonNull(GraphQLFloat) }
+			},
+			async resolve(parent, args) {
+				const data = await dwollaController.withdrawFundsFromWallet(args)
 				return data
 			}
 		}
