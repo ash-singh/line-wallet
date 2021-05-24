@@ -22,11 +22,6 @@ const placidSchema = new mongoose.Schema({
   }
 });
 
-const dwollaSchema = new mongoose.Schema({
-  wallet: String,
-  funding_source: String
-});
-
 const userSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -35,10 +30,18 @@ const userSchema = new mongoose.Schema({
   access_token: String,
   verification_token: String,
   placid: placidSchema,
-  dwolla: dwollaSchema,
+  dwolla: {
+    customer: String,
+    wallet: {
+      id: String,
+      funding_source: String,
+      created:  String,
+      source_type: String,
+      name: String,
+    }
+  },
   is_verified: Boolean
 });
 
 module.exports.Placid = mongoose.model('Placid', placidSchema);
-module.exports.Dwolla = mongoose.model('Dwolla', dwollaSchema);
 module.exports.User = mongoose.model('User', userSchema)

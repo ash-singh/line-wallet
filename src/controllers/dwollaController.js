@@ -2,27 +2,25 @@ const {User} = require('../models/Model');
 const {prettyPrintResponse} = require('../util');
 const dwollaClient = require('../libs/dwolla/client');
 
-const linkWalletSource = (user, walletUrl) => {
-
+const linkWalletSource = (user, customerUrl) => {
  
-  var requestBody = {
-    routingNumber: user.placid.account.routing,
-    accountNumber: user.placid.account.account,
-    bankAccountType: "checking",
-    name: user.placid.account.name,
-  };
-
   dwollaClient
-    .post(`${walletUrl}/funding-sources`, requestBody)
+    .get(`${customerUrl}/funding-sources`)
     .then(function (res) {
-      const fundingSource = res.headers.get("location");
-      
-      var dwallo = {
-        wallet: walletUrl, 
-        funding_source: fundingSource
-      };
+      var fundingSource = res.body._embedded["funding-sources"][0];
 
-      return User.findByIdAndUpdate(user._id, { dwolla: dwallo}, {new: true, useFindAndModify:false});
+      var dwolla = {
+        customer: customerUrl,
+        wallet : {
+          id: fundingSource.id,
+          funding_source: fundingSource._links.self.href,
+          created:  fundingSource.created,
+          source_type: fundingSource.type,
+          name: fundingSource.name,
+        }
+      };
+      
+      return User.findByIdAndUpdate(user._id, { dwolla: dwolla}, {new: true, useFindAndModify:false});
     });
 }
 
@@ -46,14 +44,20 @@ exports.createWallet = async req => {
       firstName: fullName.split(' ').slice(0, -1).join(' '),
       lastName: fullName.split(' ').slice(-1).join(' '),
       email: user.placid.email,
-      type: "receive-only",
-      ipAddress: "99.99.99.99",
+      type: 'personal',
+      ipAddress: '99.99.99.99',
+      address1: user.placid.address.street,
+      city: user.placid.address.city,
+      state: user.placid.address.region,
+      postalCode: user.placid.address.postal_code,
+      dateOfBirth: "1970-01-01",
+      ssn: "1234"
     };
     
     dwollaClient.post("customers", requestBody).then(function (res) {
-      const wallet = res.headers.get("location"); 
+      const customerUrl = res.headers.get("location"); 
       
-      linkWalletSource(user, wallet);
+      linkWalletSource(user, customerUrl);
 
     }).catch(function(err){
       prettyPrintResponse(err);
