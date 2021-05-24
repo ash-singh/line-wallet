@@ -15,11 +15,10 @@
 ```shell script
     $ docker compose up -d
 ```
-2. install monodb
-```shell script
-    $ docker compose up -d
-```
 3. create a copy of .env.example and name it .env 
+```shell script
+    $ cp .env.example .env
+```
 
 4. set your own value for env variable in .env
 
