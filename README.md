@@ -1,8 +1,5 @@
 # line-wallet
 
-## challenge
-1. node challenge/run.js
-
 ## Prerequisites
 - [nodejs]
 - [docker](https://docs.docker.com/install/)
@@ -11,22 +8,28 @@
 
 1. clone [https://github.com/ash-singh/line-wallet.git](https://github.com/ash-singh/line-wallet.git) and `cd` into the project's root
 
-2. start monodb
+## challenge
+2. Run challenge
+```shell script
+    $ node challenge/run.js
+```
+
+3. start monodb
 ```shell script
     $ docker compose up -d
 ```
-3. create a copy of .env.example and name it .env 
+4. create a copy of .env.example and name it .env 
 ```shell script
     $ cp .env.example .env
 ```
 
-4. set your own value for env variable in .env
+5. set your own value for env variable in .env
 
-5. run following command
+6. run following command
 ```shell script
     $ bash run.sh
 ```
-5. naviagate to [http://localhost:4000/graphql](http://localhost:4000/graphql)
+7. naviagate to [http://localhost:4000/graphql](http://localhost:4000/graphql)
 
 ## Setting Plaid access token
 
