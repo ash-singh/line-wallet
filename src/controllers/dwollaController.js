@@ -21,7 +21,6 @@ const linkWalletSource = (userId, walletUrl) => {
         dwolla_wallet: walletUrl, 
         dwolla_funding_source: fundingSource
       };
-      console.log(update);
 
       return User.findByIdAndUpdate(userId, update, {new: true,});
     });

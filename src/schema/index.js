@@ -23,11 +23,22 @@ const userType = new GraphQLObjectType({
         _id: { type: GraphQLID },
 		name: { type: GraphQLString },
 		email: { type: GraphQLString },
-		phone: { type: GraphQLString },
+		password: { type: GraphQLString },
 		is_verified: {type: GraphQLBoolean}
     })
 });
 
+// Line app access token
+const lineAccessTokenType = new GraphQLObjectType({
+	name: 'LineAccessToken',
+	fields: () => ({
+        _id: { type: GraphQLID },
+		access_token: { type: GraphQLString },
+		email: { type: GraphQLString }
+    })
+});
+
+// Plaid link token
 const plaidLinkTokenType = new GraphQLObjectType({
 	name: 'PlaidLinkToken',
 	fields: () => ({
@@ -37,6 +48,7 @@ const plaidLinkTokenType = new GraphQLObjectType({
     })
 });
 
+// Plaid account and rounting 
 const plaidAccountRountingType = new GraphQLObjectType({
 	name: 'PlaidAccountRounting',
 	fields: () => ({
@@ -64,12 +76,12 @@ const RootQuery = new GraphQLObjectType({
 const Mutations = new GraphQLObjectType({
 	name: 'Mutations',
 	fields: {
-		addUser: {
+		createUser: {
 			type: userType,
 			args: {
 				name: { type: new GraphQLNonNull(GraphQLString) },
 				email: { type: new GraphQLNonNull(GraphQLString) },
-				phone: { type: GraphQLString }
+				password: { type: new GraphQLNonNull(GraphQLString) },
 			},
 			async resolve(parent, args) {
 				const data = await userController.addUser(args)
@@ -77,13 +89,24 @@ const Mutations = new GraphQLObjectType({
 			}
 		},
 		verifyUser: {
-			type: userType,
+			type: lineAccessTokenType,
 			args: {
 				verification_token: { type: new GraphQLNonNull(GraphQLString) },
 				email: { type: new GraphQLNonNull(GraphQLString) }
 			},
 			async resolve(parent, args) {
 				const data = await userController.verifyUser(args)
+				return data
+			}
+		},
+		login: {
+			type: lineAccessTokenType,
+			args: {
+				email: { type: new GraphQLNonNull(GraphQLString) },
+				password: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await userController.login(args)
 				return data
 			}
 		},

@@ -4,6 +4,7 @@ dotenv.config();
 module.exports = {
     port: process.env.PORT,
     app_name: process.env.APP_NAME,
+    crypto_password: process.env.APP_NAME,
 
     mongo_uri: process.env.MONGO_URI,
 
