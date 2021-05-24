@@ -49,6 +49,31 @@ const plaidLinkTokenType = new GraphQLObjectType({
     })
 });
 
+// Wallet transaction
+const walletTransactionType = new GraphQLObjectType({
+	name: 'WalletTransaction',
+	fields: () => ({
+        created: { type: GraphQLString },
+		user_id: { type: GraphQLString },
+		wallet_id: { type: GraphQLString },
+		amount: { type: GraphQLString },
+		currency: { type: GraphQLString },
+		created: { type: GraphQLString },
+    })
+});
+
+
+// Wallet balance
+const walletBalanceType = new GraphQLObjectType({
+	name: 'WalletBalance',
+	fields: () => ({
+        user_id: { type: GraphQLString },
+		wallet_id: { type: GraphQLString },
+		amount: { type: GraphQLString },
+		created: { type: GraphQLString },
+    })
+});
+
 // Plaid account and rounting 
 const plaidAccountRountingType = new GraphQLObjectType({
 	name: 'PlaidAccountRounting',
@@ -168,7 +193,7 @@ const Mutations = new GraphQLObjectType({
 			}
 		},
 		depositFundsToWallet: {
-			type: userType,
+			type: walletTransactionType,
 			args: {
 				user_id: { type: new GraphQLNonNull(GraphQLString) },
 				access_token: { type: new GraphQLNonNull(GraphQLString) },
@@ -181,7 +206,7 @@ const Mutations = new GraphQLObjectType({
 			}
 		},
 		withdrawFundsFromWallet: {
-			type: userType,
+			type: walletTransactionType,
 			args: {
 				user_id: { type: new GraphQLNonNull(GraphQLString) },
 				access_token: { type: new GraphQLNonNull(GraphQLString) },
@@ -190,6 +215,28 @@ const Mutations = new GraphQLObjectType({
 			},
 			async resolve(parent, args) {
 				const data = await dwollaController.withdrawFundsFromWallet(args)
+				return data
+			}
+		},
+		getWalletBalance: {
+			type: walletBalanceType,
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await dwollaController.getWalletBalance(args)
+				return data
+			}
+		},
+		getWalletTransactions: {
+			type: new GraphQLList(walletTransactionType),
+			args: {
+				user_id: { type: new GraphQLNonNull(GraphQLString) },
+				access_token: { type: new GraphQLNonNull(GraphQLString) }
+			},
+			async resolve(parent, args) {
+				const data = await dwollaController.getWalletTransactions(args)
 				return data
 			}
 		}

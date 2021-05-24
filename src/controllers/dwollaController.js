@@ -161,6 +161,7 @@ exports.depositFundsToWallet = async req => {
 	}
 }
 
+// Withdraw funds from wallet
 exports.withdrawFundsFromWallet = async req => {
 	try {
 		
@@ -192,6 +193,52 @@ exports.withdrawFundsFromWallet = async req => {
       }
     }
     transfer(user, payload);
+    
+	} catch (err) {
+		prettyPrintResponse(err);
+	}
+}
+
+
+// Get wallet balance
+exports.getWalletBalance = async req => {
+	try {
+		
+    const userId = req.params === undefined ? req.user_id : req.params.user_id;
+    const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
+    
+    const filter = {_id: userId, access_token: lineAccessToken};
+    const user =  await User.findOne(filter);
+
+    if (user === null) {
+      prettyPrintResponse({filter, 'message': "Invalid user"});
+      return;
+    }
+    
+	} catch (err) {
+		prettyPrintResponse(err);
+	}
+}
+
+// Get wallet transactions
+exports.getWalletTransactions = async req => {
+	try {
+		
+    const userId = req.params === undefined ? req.user_id : req.params.user_id;
+    const lineAccessToken = req.params === undefined ? req.access_token : req.params.access_token;
+    
+    const filter = {_id: userId, access_token: lineAccessToken};
+    const user =  await User.findOne(filter);
+
+    if (user === null) {
+      prettyPrintResponse({filter, 'message': "Invalid user"});
+      return;
+    }
+    const query = {wallet_id: user.dwolla.wallet.id};
+    const transaction = await Transaction.find(query);
+
+    return transaction
+
     
 	} catch (err) {
 		prettyPrintResponse(err);
