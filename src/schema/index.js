@@ -29,6 +29,18 @@ const userType = new GraphQLObjectType({
     })
 });
 
+// Wallet Type
+const walletType = new GraphQLObjectType({
+	name: 'Wallet',
+	fields: () => ({
+        _id: { type: GraphQLID },
+		id: { type: GraphQLString },
+		funding_source: { type: GraphQLString },
+		name: { type: GraphQLString },
+		created: {type: GraphQLString}
+    })
+});
+
 // Line app access token
 const lineAccessTokenType = new GraphQLObjectType({
 	name: 'LineAccessToken',
@@ -183,7 +195,7 @@ const Mutations = new GraphQLObjectType({
 			}
 		},
 		createWallet: {
-			type: userType,
+			type: walletType,
 			args: {
 				user_id: { type: new GraphQLNonNull(GraphQLString) },
 				access_token: { type: new GraphQLNonNull(GraphQLString) }

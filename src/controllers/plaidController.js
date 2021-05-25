@@ -40,15 +40,21 @@ const extractPlacidUserIdentity = (identities) => {
 const extractAccountIdentity = (data) => {
   
   const accounts = data.accounts;
-  const accountInfo = data.numbers.ach[0];
+  const routingAccounts = data.numbers.ach;
 
-  for (let account of accounts) {
-    if (account.account_id == accountInfo.account_id) {
-      accountInfo.name = account.name;
-      accountInfo.account_type = account.type;
+  var accountInfo = {};
+  
+  for (let routingAccount of routingAccounts) {
+    for (let account of accounts) {
+      if (account.account_id == routingAccount.account_id
+        && account.subtype == 'savings') {
+          accountInfo =  routingAccount;
+          accountInfo.name = account.name;
+          accountInfo.account_type = account.subtype;
+      }
     }
   }
-  
+
   return accountInfo;
 }
 

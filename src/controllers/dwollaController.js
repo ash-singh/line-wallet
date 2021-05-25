@@ -3,9 +3,9 @@ const {prettyPrintResponse} = require('../util');
 const dwollaClient = require('../libs/dwolla/client');
 
 // Link wallet source 
-const linkWalletSource = (user, customerUrl, fundingSourceLink) => {
+const linkWalletSource = async (user, customerUrl, fundingSourceLink) => {
  
-  dwollaClient
+  const response = dwollaClient
     .get(`${customerUrl}/funding-sources`)
     .then(function (res) {
       var fundingSources = res.body._embedded["funding-sources"];
@@ -29,15 +29,19 @@ const linkWalletSource = (user, customerUrl, fundingSourceLink) => {
         funding_source: fundingSourceLink,
         wallet : balanceAccount
       };
-
+      
       return User.findByIdAndUpdate(user._id, { dwolla: dwolla}, {new: true, useFindAndModify:false});
+    }).catch(err => {
+      prettyPrintResponse(err)
     });
+
+    return await response;
 }
 
 // Transfer money to/from wallet
-const transfer = (user, payload) => {
+const transfer = async (user, payload) => {
   
-  dwollaClient
+  const transaction = dwollaClient
     .post(`transfers`, payload)
     .then(function (res) {
       var transferLink = res.headers.get("location");
@@ -52,14 +56,15 @@ const transfer = (user, payload) => {
       transaction.created = (new Date()).toISOString();
       transaction.transfer_link = transferLink;
 
-      Transaction.save(transaction)
+      return transaction.save()
     }).catch(error => { 
       prettyPrintResponse(error);
     });
+  return await transaction;
 }
 
 // Link plaicd account with dwolla customer
-const linkBankAccount = (user, customerUrl) => {
+const linkBankAccount = async (user, customerUrl) => {
  
   var requestBody = {
     routingNumber: user.placid.account.routing,
@@ -68,14 +73,17 @@ const linkBankAccount = (user, customerUrl) => {
     name: user.placid.account.name,
   };
 
-  dwollaClient
+  const response = dwollaClient
     .post(`${customerUrl}/funding-sources`, requestBody)
     .then(function (res) {
       var fundingSource = res.headers.get("location");
-
-      linkWalletSource(user, customerUrl, fundingSource);
+  
+      return linkWalletSource(user, customerUrl, fundingSource);
+  }).catch(err => {
+    prettyPrintResponse(err)
   });
 
+  return await response;
 }
 
 // Create dwolla wallet
@@ -100,7 +108,7 @@ exports.createWallet = async req => {
       lastName: fullName.split(' ').slice(-1).join(' '),
       email: user.placid.email,
       type: 'personal',
-      ipAddress: '99.99.99.99',
+      //ipAddress: '99.99.99.99',
       address1: user.placid.address.street,
       city: user.placid.address.city,
       state: user.placid.address.region,
@@ -109,14 +117,17 @@ exports.createWallet = async req => {
       ssn: "1234"
     };
     
-    dwollaClient.post("customers", requestBody).then(function (res) {
-      const customerUrl = res.headers.get("location"); 
-      
-      linkBankAccount(user, customerUrl);
+    const response = dwollaClient
+      .post("customers", requestBody)
+      .then(function (res) {
+        const customerUrl = res.headers.get("location"); 
+        return linkBankAccount(user, customerUrl);
 
-    }).catch(function(err){
-      prettyPrintResponse(err);
-    });
+      }).catch(function(err){
+        prettyPrintResponse(err);
+      });
+
+    return await response;
     
 	} catch (err) {
 		prettyPrintResponse(err);
@@ -154,7 +165,7 @@ exports.depositFundsToWallet = async req => {
           value: amount.toString()
       }
     }
-    transfer(user, payload);
+    return transfer(user, payload);
     
 	} catch (err) {
 		prettyPrintResponse(err);
@@ -192,7 +203,7 @@ exports.withdrawFundsFromWallet = async req => {
           value: amount.toString()
       }
     }
-    transfer(user, payload);
+    return transfer(user, payload);
     
 	} catch (err) {
 		prettyPrintResponse(err);
